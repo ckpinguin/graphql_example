@@ -1,13 +1,14 @@
-// const fetch = require('node-fetch')
+const fetch = require('node-fetch')
 const {promisify} = require('util')
 const xml2js = require('xml2js')
-// const parseXML = promisify(xml2js.parseString)
+const parseXML = promisify(xml2js.parseString)
 
 const {
     GraphQLSchema,
     GraphQLObjectType,
     GraphQLInt,
-    GraphQLString
+    GraphQLString,
+    GraphQLList
 } = require('graphql')
 // key: MG8pOgmx22SeEgothH6Q
 // secret: sDGhaCna2HO3lvTrh7sP9x0XDoItlSh2HGAhngpXB3U
@@ -17,13 +18,34 @@ const {
 // )
 // .then(response => response.text())
 // .then(parseXML)
+const BookType = new GraphQLObjectType({
+    name: 'Book',
+    description: '...',
 
+    fields: () => ({
+        title: {
+            type: GraphQLString,
+            resolve: xml => xml.title[0]
+        },
+        isbn: {
+            type: GraphQLString,
+            resolve: xml => xml.isbn[0]
+        }
+    })
+})
 const AuthorType = new GraphQLObjectType({
     name: 'Author',
     description: '...',
     fields: () => ({
         name: {
-            type: GraphQLString
+            type: GraphQLString,
+            resolve: xml =>
+                xml.GoodreadsResponse.author[0].name[0]
+        },
+        books: {
+            type: new GraphQLList(BookType),
+            resolve: xml =>
+                xml.GoodreadsResponse.author[0].books[0].book
         }
     })
 })
@@ -41,8 +63,10 @@ module.exports = new GraphQLSchema({
                     }
                 },
                 resolve: (root, args) => fetch(
-                        `https://www.goodreads.com/author/show.xml?id=${args.id}&key=MG8pOgmx22SeEgothH6Q`
-                    )
+                    `https://www.goodreads.com/author/show.xml?id=${args.id}&key=MG8pOgmx22SeEgothH6Q`
+                )
+                .then(response => response.text())
+                .then(parseXML)
             }
         })
     })
