@@ -11,7 +11,6 @@ const {
     GraphQLList
 } = require('graphql')
 // key: MG8pOgmx22SeEgothH6Q
-// secret: sDGhaCna2HO3lvTrh7sP9x0XDoItlSh2HGAhngpXB3U
 
 // const x = fetch(
 //     'https://www.goodreads.com/author/show.xml?id=4432&key=MG8pOgmx22SeEgothH6Q'
